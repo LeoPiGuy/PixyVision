@@ -1,0 +1,16 @@
+{
+  "name": "your-app",
+  "version": "0.1.0",
+  "main": "main.js",
+  "dependencies": {
+    "electron": "^1.7.9",
+    "nw-gyp": "^3.6.2",
+    "serialport": "^6.0.4"
+  },
+  "devDependencies": {
+    "electron-rebuild": "^1.6.0"
+  },
+  "scripts": {
+    "rebuild": "electron-rebuild -f -w serialport"
+  }
+}

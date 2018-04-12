@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>PixyVision Debug Viewer</title>
+  </head>
+  <body>
+    <canvas id="canvas", width="320", height="200"></canvas>
+    <p id="distance">Distance Offset: null</p>
+    <p id="XY">Center XY: (null,null)</p>
+    <p id="height">Box Height: null</p>
+    <p id="width">Box Width: null</p>
+    <p id="Xoffset">Center X offset: null</p>
+    <p id="Yoffset">Center Y offset: null</p>
+    <p id="XDegOffset">X Degree offset: null</p>
+  </body>
+  <script>
+    const {ipcRenderer} = require("electron");
+    let fov = 75
+    let degPerPixel = 75/320
+    let coordX = 160
+    let coordY = 100
+    let width = 50
+    let height = 50
+    let canvas = document.getElementById("canvas");
+    let ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(0, 0, 320, 200);
+    function redraw() {
+      ctx.fillStyle = '#000000'
+      ctx.fillRect(0,0,320,200)
+      ctx.beginPath()
+      ctx.moveTo(160, 0)
+      ctx.lineTo(160, 200)
+      ctx.moveTo(0,100)
+      ctx.lineTo(320, 100)
+      ctx.strokeStyle = '#00ff00'
+      ctx.stroke()
+    }
+    function dot() {
+      redraw()
+      ctx.fillStyle = "#FF0000"
+      ctx.fillRect(coordX-2, coordY-2, 4,4)
+      ctx.strokeStyle = '#0000ff'
+      ctx.strokeRect(coordX-(width/2), coordY-(height/2), width, height)
+      ctx.beginPath()
+      ctx.moveTo(160, 100)
+      ctx.lineTo(coordX,coordY)
+      ctx.strokeStyle = "#FFFF00"
+      ctx.stroke()
+      let distance = document.getElementById("distance");
+      let centerXY = document.getElementById("XY");
+      let h = document.getElementById("height");   
+      let w = document.getElementById("width");
+      let xoffset = document.getElementById("Xoffset");
+      let yoffset = document.getElementById("Yoffset");
+      let XDegOffset = document.getElementById("XDegOffset")
+      distance.innerHTML = `Distance Offset: ${Math.sqrt(Math.pow((coordX-160),2)+Math.pow((coordY-100),2))}`
+      centerXY.innerHTML = `Center XY: (${coordX},${coordY})`
+      h.innerHTML = `Box Height: ${height}`
+      w.innerHTML = `Box Width: ${width}`
+      xoffset.innerHTML = `Center X offset: ${Math.abs(coordX-160)}`
+      yoffset.innerHTML = `Center Y offset: ${Math.abs(coordY-100)}`
+      XDegOffset.innerHTML = `X Degree offset: ${degPerPixel*Math.abs(coordX-160)}&deg;`
+    }
+    dot()
+    ipcRenderer.on('newData', (event, X, Y, W, H) => {
+      coordX = X
+      coordY = Y
+      width = W
+      height = H
+      dot()
+    })
+    ipcRenderer.on("loaded", (event) => {
+      ipcRenderer.send("confirmed-load")
+    })
+  </script>
+</html>
